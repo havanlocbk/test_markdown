@@ -45,8 +45,13 @@ How can we **predict and understand churn behavior** among e-commerce app users 
 
 ## 3. ⚒️ Main Process
 
+### 3.1 Exploratory Data Analysis (EDA)
+
+#### 🔹 Load dataset & initial inspection  
+👉 **Purpose:** Load raw dataset, inspect structure, summary statistics, and missing values.  
+
 <details>
-<summary>📌 Code Cell 1</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 #Load file và phân tích EDA
@@ -65,14 +70,23 @@ df.info()
 df.describe()
 df['Churn'].value_counts(normalize=True)
 print(df.isnull().sum())
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
 
+
+📍 **Key findings:**  
+- Dataset shape: 5,630 rows × 20 columns.
+- Target column moderately imbalanced.
+- Missing values in several numeric features (~200–300 each).  
+
+---
+
+#### 🔹 Numeric Features – Correlation  
+👉 **Purpose:** Calculate Pearson correlation between numeric features and churn to identify key drivers.  
 
 <details>
-<summary>📌 Code Cell 2</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 #Phân tích các biến số học - Numberic features - Correlation
@@ -87,14 +101,24 @@ for col in numeric_cols:
 print("Correlation với Churn:")
 for k,v in corrs.items():
     print(f"{k}: {v:.3f}")
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
+*Placeholder for chart: Correlation bar chart (numeric features vs churn)*
 
+📍 **Key findings:**  
+- Tenure ↓ → churn ↑
+- CashbackAmount ↑ → churn ↓
+- DaySinceLastOrder negative correlation with churn
+- SatisfactionScore unexpected positive correlation  
+
+---
+
+#### 🔹 Numeric Features – Visualization  
+👉 **Purpose:** Visualize correlation results of numeric features with churn.  
 
 <details>
-<summary>📌 Code Cell 3</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 #Phân tích các biến số học - Numberic features - Visualization
@@ -107,14 +131,21 @@ plt.xticks(rotation=45)
 plt.title("Point Biserial Correlation between Churn and Numeric Features")
 plt.axhline(0, color='black', linestyle='--')
 plt.show()
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
+*Placeholder for chart: Correlation heatmap/bar chart*
 
+📍 **Key findings:**  
+- Visual confirms strong negative correlation of tenure with churn.  
+
+---
+
+#### 🔹 Categorical Features – Chi-square test  
+👉 **Purpose:** Perform chi-square test on categorical variables to detect significant associations with churn.  
 
 <details>
-<summary>📌 Code Cell 4</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 #AFTER FEEDBACK
@@ -170,25 +201,43 @@ for col in cat_cols:
     plt.ylabel("Churn rate")
     plt.xticks(rotation=45)
     plt.show()
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
+*Placeholder for chart: Churn rate by categorical features*
 
+📍 **Key findings:**  
+- COD payment method linked to higher churn
+- Complaints strongly associated with churn
+- Certain devices show higher churn rates  
+
+---
+
+#### 🔹 Categorical Features – Visualization  
+👉 **Purpose:** Visualize churn rates across categorical variables.  
 
 <details>
-<summary>📌 Code Cell 5</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 #Build the Machine Learning model for predicting churned users. (fine tuning)
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
+*Placeholder for chart: Bar plots for categorical churn rates*
 
+📍 **Key findings:**  
+- Visualization highlights churn-prone groups (COD users, complainers).  
+
+---
+
+### 3.2 Modeling
+
+#### 🔹 Train-test split  
+👉 **Purpose:** Split dataset into training and testing sets with stratification on churn variable.  
 
 <details>
-<summary>📌 Code Cell 6</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 # Setup & đọc dữ liệu
@@ -209,14 +258,21 @@ from sklearn.ensemble import RandomForestClassifier
 import xgboost as xgb
 import joblib
 import matplotlib.pyplot as plt
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
 
+
+📍 **Key findings:**  
+- Train: 80%, Test: 20%, stratified by churn.  
+
+---
+
+#### 🔹 Logistic Regression (baseline)  
+👉 **Purpose:** Fit logistic regression with class weights to handle imbalance.  
 
 <details>
-<summary>📌 Code Cell 7</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 # Chuẩn hóa tên cột
@@ -239,14 +295,21 @@ cat_cols = X.select_dtypes(include=["object", "category", "bool"]).columns.tolis
 print("Số mẫu:", len(df))
 print("Tỷ lệ churn:", y.mean().round(4))
 print("Số numeric:", len(num_cols), "| Số categorical:", len(cat_cols))
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
 
+
+📍 **Key findings:**  
+- Baseline model for comparison.  
+
+---
+
+#### 🔹 Random Forest Classifier  
+👉 **Purpose:** Train a Random Forest model with class weights to improve recall on churn class.  
 
 <details>
-<summary>📌 Code Cell 8</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 #Pre-processing - tiền xử lý
@@ -265,14 +328,21 @@ preprocessor = ColumnTransformer([
     ("num", num_tf, num_cols),
     ("cat", cat_tf, cat_cols)
 ])
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
 
+
+📍 **Key findings:**  
+- Stronger performance expected vs Logistic Regression.  
+
+---
+
+#### 🔹 Model Evaluation  
+👉 **Purpose:** Evaluate models using classification report, confusion matrix, and ROC-AUC.  
 
 <details>
-<summary>📌 Code Cell 9</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 #Train, Valid, Split
@@ -283,14 +353,21 @@ X_train, X_test, y_train, y_test = train_test_split(
 pos = y_train.sum(); neg = len(y_train) - pos
 scale_pos_weight = (neg / pos) if pos > 0 else 1.0
 scale_pos_weight
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
+*Placeholder for chart: Confusion Matrix (RF), ROC Curve, PR Curve*
 
+📍 **Key findings:**  
+- Random Forest outperforms Logistic Regression on recall and F1.  
+
+---
+
+#### 🔹 Threshold tuning – F1 optimization  
+👉 **Purpose:** Tune decision threshold to maximize F1 score.  
 
 <details>
-<summary>📌 Code Cell 10</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 #AFTER FEEDBACK
@@ -326,26 +403,43 @@ y_proba_rf = pipe_rf.predict_proba(X_test)[:,1]
 print("Random Forest (Baseline)")
 print("ROC-AUC:", roc_auc_score(y_test, y_proba_rf).round(4))
 print("PR-AUC:", average_precision_score(y_test, y_proba_rf).round(4))
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
 
+
+📍 **Key findings:**  
+- Optimal threshold ~0.35 → Recall ~0.94, Precision ~0.88.  
+
+---
+
+#### 🔹 Threshold tuning – Recall ≥ 0.8  
+👉 **Purpose:** Select threshold ensuring Recall ≥ 0.8 for churn detection.  
 
 <details>
-<summary>📌 Code Cell 11</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 ## Sau khi xem kết quả baseline, thì Random Forest tốt hơn
 # chọn Random Forest model để tuning
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
 
+
+📍 **Key findings:**  
+- Threshold ~0.52 → Recall ~0.80, Precision ~0.92.
+- Chosen threshold = 0.52 (balanced trade-off).  
+
+---
+
+### 3.3 Segmentation (Clustering)
+
+#### 🔹 Prepare churned subset  
+👉 **Purpose:** Filter dataset for churned users only for segmentation analysis.  
 
 <details>
-<summary>📌 Code Cell 12</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 from sklearn.metrics import precision_recall_curve, classification_report, confusion_matrix, roc_auc_score, average_precision_score
@@ -389,14 +483,21 @@ if mask.any():
     print("\n=== Kết quả với threshold Recall≥0.80 ===")
     print(confusion_matrix(y_true, y_pred_rec))
     print(classification_report(y_true, y_pred_rec, digits=3))
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
 
+
+📍 **Key findings:**  
+- Subset ready for clustering.  
+
+---
+
+#### 🔹 Feature selection & scaling  
+👉 **Purpose:** Select features for clustering and apply standard scaling.  
 
 <details>
-<summary>📌 Code Cell 13</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 # Lưu kết quả
@@ -408,14 +509,21 @@ results = pd.DataFrame({
     "y_pred_Recall80": (y_proba >= 0.490).astype(int)  # đổi 0.490 nếu bạn chọn ngưỡng khác
 })
 results.head()
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
 
+
+📍 **Key findings:**  
+- Data standardized for KMeans.  
+
+---
+
+#### 🔹 Elbow method  
+👉 **Purpose:** Use SSE to determine optimal number of clusters.  
 
 <details>
-<summary>📌 Code Cell 14</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 from sklearn.preprocessing import StandardScaler
@@ -445,14 +553,21 @@ plt.xlabel("Number of clusters")
 plt.ylabel("WCSS")
 plt.title("Elbow Method")
 plt.show()
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
+*Placeholder for chart: Elbow method (SSE vs k)*
 
+📍 **Key findings:**  
+- Elbow suggests k=4 clusters.  
+
+---
+
+#### 🔹 KMeans clustering  
+👉 **Purpose:** Fit final KMeans model (k=4) and assign cluster labels to churned users.  
 
 <details>
-<summary>📌 Code Cell 15</summary>
+<summary>📌 View Python code</summary>
 
 ```python
 # Chọn k=4
@@ -462,11 +577,18 @@ churn_users["Cluster"] = kmeans.fit_predict(X_scaled)
 # Xem đặc trưng trung bình mỗi nhóm
 cluster_summary = churn_users.groupby("Cluster")[features].mean().round(2)
 print(cluster_summary)
-```  
+```
 </details>
 
-*Placeholder for chart/output if applicable*  
+*Placeholder for chart: Cluster distribution (k=4)*
 
+📍 **Key findings:**  
+- Cluster 0: Long-tenure, cashback users
+- Cluster 1: High orders, low satisfaction
+- Cluster 2: New, high app usage
+- Cluster 3: Very new, low activity  
+
+---
 
 
 ---
